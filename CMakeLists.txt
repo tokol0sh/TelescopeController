@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.0.0)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+project(TelescopeControlProgram)
+add_subdirectory(SFML-2.4.1)
+include_directories(SFML-2.4.1/include)
+add_subdirectory(Serial)
+include_directories(Serial/include)
+add_executable(TelescopeControlProgram src/main.cpp src/graph.cpp src/graph.h src/motor.hpp)
+
+target_link_libraries(TelescopeControlProgram sfml-system sfml-window sfml-graphics serial)
