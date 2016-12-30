@@ -171,6 +171,7 @@ typedef struct _CTRL_Version_
 
 typedef struct _MOTOR_Vars_t_
 {
+	//1 * 10 = 10 bytes
   bool Flag_enableSys;
   bool Flag_Run_Identify;
   bool Flag_MotorIdentified;
@@ -181,15 +182,15 @@ typedef struct _MOTOR_Vars_t_
   bool Flag_enableOffsetcalc;
   bool Flag_enablePowerWarp;
   bool Flag_enableSpeedCtrl;
-  bool startup;
 
+  // 4 * 4 = 16 bytes
   CTRL_State_e CtrlState;
   EST_State_e EstState;
 
   USER_ErrorCode_e UserErrorCode;
 
   CTRL_Version CtrlVersion;
-
+  //12*4 = 48 bytes
   long IdRef_A;
   long IqRef_A;
   long SpeedRef_pu;
@@ -203,6 +204,7 @@ typedef struct _MOTOR_Vars_t_
   long Flux_Wb;
   long Torque_Nm;
 
+  // 7 * 4 = 28 bytes
   float_t MagnCurr_A;
   float_t Rr_Ohm;
   float_t Rs_Ohm;
@@ -211,6 +213,7 @@ typedef struct _MOTOR_Vars_t_
   float_t Lsq_H;
   float_t Flux_VpHz;
 
+  //18 * 4 = 72 bytes
   float_t ipd_excFreq_Hz;
   long     ipd_Kspd;
   long     ipd_excMag_coarse_pu;
@@ -233,7 +236,7 @@ typedef struct _MOTOR_Vars_t_
   long Id_A;
   long Iq_A;
   long Is_A;
-
+  //2 * 12 = 24 bytes
   MATH_vec3 I_bias;
   MATH_vec3 V_bias;
 
