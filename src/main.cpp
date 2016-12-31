@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 		//SerialPort.write(buffer);
 		if (buffer.size() > sizeof(RA_motor) - 1) {
 			memcpy(&RA_motor, &buffer[0], sizeof(RA_motor));
-			std::cout << "Flag_enableForceAngle: " << RA_motor.Flag_Run_Identify << "\r";
+			std::cout << "Flag_enableSys: " << RA_motor.Flag_enableSys <<  " Flag_enableForceAngle: " << RA_motor.Flag_enableForceAngle << " V_bias: " << RA_motor.V_bias.value[2] << " Vbus: " << RA_motor.VdcBus_kV / pow(2,24) * 1000 << " MotorSpeedTrajectory: " << RA_motor.SpeedTraj_krpm / pow(2,24) * 1000 << "\r";
 			//std::cout << "Flag_enableFieldWeakening: " << RA_motor.Flag_enableFieldWeakening << std::endl;
 			//std::cout << "Flag_enableSys: " << RA_motor.Flag_enableSys << std::endl;
 			buffer.clear();
