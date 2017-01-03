@@ -90,9 +90,9 @@ void graph::update(sf::RenderWindow &window) {
 		float x = i;
 		float y = *(dataPoints.begin() + i);
 
-		currentVal = yAxis - y;
-		RMSvalue += pow((yAxis - y), 2.0);
-		chart.append(sf::Vertex(sf::Vector2f(x + xOffset, y + yOffset), sf::Color::Blue));
+		currentVal =  y;
+		RMSvalue += pow(currentVal, 2.0);
+		chart.append(sf::Vertex(sf::Vector2f(x + xOffset, (yAxis-y) + yOffset), sf::Color::Blue));
 	}
 	window.draw(chart);
 }

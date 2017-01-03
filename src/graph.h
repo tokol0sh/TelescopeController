@@ -6,7 +6,7 @@
 
 class graph {
 public:
-	float xOffset, yOffset, xAxis, yAxis, currentVal, RMSvalue;
+	float xOffset, yOffset, xAxis, yAxis, currentVal, RMSvalue = 0;
 	std::vector<float> dataPoints;
 	sf::Text title;
 
