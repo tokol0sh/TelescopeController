@@ -8,10 +8,15 @@ class graph {
 public:
 	float xOffset, yOffset, xAxis, yAxis, currentVal, RMSvalue = 0;
 	std::vector<float> dataPoints;
+	int index;
 	sf::Text title;
+	sf::Text currentValue;
+	sf::Text CurrentValue;
+	sf::Text rmstValue;
+	sf::Text RmstValue;
 
 
-	graph(float x, float y, float w, float h) : xOffset(x), yOffset(y), xAxis(x), yAxis(y) {
+	graph(float x, float y, float w, float h) : xOffset(x), yOffset(y), xAxis(w), yAxis(h), dataPoints(500,0), index(0){
 	}
 
 	void setPosition(float x, float y);

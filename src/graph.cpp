@@ -12,6 +12,7 @@ float graph::getPosition() {
 void graph::setAxisLength(float xlen, float ylen) {
 	xAxis = xlen;
 	yAxis = ylen;
+	dataPoints.reserve(xAxis);
 }
 
 float graph::getAxisLength() {
@@ -28,27 +29,27 @@ void graph::setTitle(sf::Font &font, char text[]) {
 
 void graph::drawStats(sf::RenderWindow &window, sf::Font &font) {
 	//Draw some stats below the graph. Input selects which stats to draw (min/max, avg, RMS, current val, etc)
-	sf::Text currentValue;
+	
 	currentValue.setFont(font);
 	currentValue.setCharacterSize(24);
 	currentValue.setPosition(xOffset + 200, yOffset + 200);
 	currentValue.setString(std::to_string(currentVal));
 
-	sf::Text CurrentValue;
+	
 	CurrentValue.setFont(font);
 	CurrentValue.setCharacterSize(24);
 	CurrentValue.setPosition(xOffset, yOffset + 200);
 	CurrentValue.setString("Current Value:");
 
 
-	sf::Text rmstValue;
+	
 	rmstValue.setFont(font);
 	rmstValue.setCharacterSize(24);
 	rmstValue.setPosition(xOffset + 200, yOffset + 200 + 30);
 	RMSvalue = sqrtf((1.0 / xAxis) * RMSvalue);
 	rmstValue.setString(std::to_string(RMSvalue));
 
-	sf::Text RmstValue;
+	
 	RmstValue.setFont(font);
 	RmstValue.setCharacterSize(24);
 	RmstValue.setPosition(xOffset, yOffset + 200 + 30);
@@ -88,11 +89,11 @@ void graph::update(sf::RenderWindow &window) {
 	chart.clear();
 	for (int i = 0; i < dataPoints.size(); i++) {
 		float x = i;
-		float y = *(dataPoints.begin() + i);
+		float y = dataPoints[(index + i) % dataPoints.size()];
 
-		currentVal =  y;
+		currentVal = y;
 		RMSvalue += pow(currentVal, 2.0);
-		chart.append(sf::Vertex(sf::Vector2f(x + xOffset, (yAxis-y) + yOffset), sf::Color::Blue));
+		chart.append(sf::Vertex(sf::Vector2f(x + xOffset, (yAxis - y) + yOffset), sf::Color::Blue));
 	}
 	window.draw(chart);
 }
