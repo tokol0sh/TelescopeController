@@ -6,7 +6,7 @@
 
 class graph {
 public:
-	float xOffset, yOffset, xAxis, yAxis, currentVal, RMSvalue = 0;
+	float xOffset, yOffset, xAxis, yAxis, currentVal, RMSvalue;
 	std::vector<float> dataPoints;
 	int index;
 	sf::Text title;
@@ -16,7 +16,7 @@ public:
 	sf::Text RmstValue;
 
 
-	graph(float x, float y, float w, float h) : xOffset(x), yOffset(y), xAxis(w), yAxis(h), dataPoints(500,0), index(0){
+	graph(float x, float y, float w, float h) : xOffset(x), yOffset(y), xAxis(w), yAxis(h), dataPoints(500,0), index(0), RMSvalue(0){
 	}
 
 	void setPosition(float x, float y);

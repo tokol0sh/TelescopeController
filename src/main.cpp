@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <iostream>
+#include <thread>  
 #include "motor.hpp"
 #include "Serial/serial.h"
 #include <SFML/Graphics.hpp>
@@ -23,15 +24,44 @@ void toc() {
 	tictoc_stack.pop();
 }
 
+void uartComms() {
+	std::string buffer;
+	std::vector<double> Odrive_data(30);
+	printf("Connect to the Odrive\n");
+	serial::Serial SerialPort("COM6", 921600, serial::Timeout::simpleTimeout(1000));
+
+	std::string message;
+	message = "s 0 6 " + std::to_string(0.0);
+	SerialPort.write(message);
+
+
+	for (int i = 0; i < 30; i++)
+	{
+
+		message = "g 0 " + std::to_string(i);
+
+		SerialPort.write(message);
+
+		SerialPort.readline(buffer, 30, "\n");
+		Odrive_data[i] = (atof(buffer.c_str()));
+
+		buffer.clear();
+		SerialPort.flush();
+	}
+}
+
+
+
 int main(int argc, char** argv) {
 
 	int i = 0;
 	double gain = 0.0015;
 	double position = 0.0015;
 	std::vector<double> Odrive_data(30);
+	std::vector<graph> graphs;
 	sf::Clock clock;
 
-	sf::RenderWindow window(sf::VideoMode(1400, 800), "Drawing Graphs");
+	sf::RenderWindow window(sf::VideoMode(1400, 800), "Space Men");
 	sf::Font font;
 	std::string buffer;
 
@@ -47,26 +77,21 @@ int main(int argc, char** argv) {
 
 	printf("Motor Controller Status\n");
 	serial::Serial SerialPort("COM6", 921600, serial::Timeout::simpleTimeout(1000));
+
 	
+	graphs.emplace_back(700, 100, 500, 100);
+	graphs.emplace_back(100, 500, 500, 100);
+	graphs.emplace_back(100, 100, 500, 100);
+	graphs.emplace_back(700, 500, 500, 100);
 
-	graph iBus(700, 100, 500, 100);
-	//iBus.setPosition(700, 100);
-	//iBus.setAxisLength(500, 100);
-	iBus.setTitle(font, "M0 Position Setpoint");
+	graphs[0].setTitle(font, "M0 Position Setpoint");
 
+	graphs[1].setTitle(font, "DC Bus Voltage");
 
-	graph vBus(100,500,500,100);
-	//vBus.setPosition(100,500);
-	//vBus.setAxisLength(500,100);
-	vBus.setTitle(font, "DC Bus Voltage");
-
-
-	graph DEC_position(100, 100, 500, 100);
-	//DEC_position.setPosition(100, 100);
-	//DEC_position.setAxisLength(500, 100);
-	DEC_position.setTitle(font, "M0 Position");
+	graphs[2].setTitle(font, "M0 Position");
 	
 	
+
 	std::string message;
 	message = "s 0 6 " + std::to_string(0.0);
 	SerialPort.write(message);
@@ -113,7 +138,7 @@ int main(int argc, char** argv) {
 		}
 
 
-		for (i = 25; i < 30; i++) 
+		for (i = 0; i < 30; i++) 
 		{
 
 			message = "g 0 " + std::to_string(i);
@@ -141,24 +166,21 @@ int main(int argc, char** argv) {
 		}
 
 
-		vBus.addDatapoint(Odrive_data[VBUS_VOLTAGE]);
-		iBus.addDatapoint(Odrive_data[M0_VEL_GAIN]);
-		DEC_position.addDatapoint(Odrive_data[M0_ROTOR_PLL_POS]);
+		graphs[0].addDatapoint(Odrive_data[VBUS_VOLTAGE]);
+		graphs[1].addDatapoint(Odrive_data[M0_VEL_GAIN]);
+		graphs[2].addDatapoint(Odrive_data[M0_ROTOR_PLL_POS]);
+
 		std::cout << "Position setpoint: " << Odrive_data[M0_POS_SETPOINT]  << "\n";
 
 		window.clear();
 
-		vBus.update(window);
-		iBus.update(window);
-		DEC_position.update(window);
-		
-		vBus.draw(window);
-		iBus.draw(window);
-		DEC_position.draw(window);
+		for (int i = 0; i < graphs.size(); i++) {
+			graphs[i].update(window);
+			graphs[i].draw(window);
+			graphs[i].drawStats(window, font);
+		}
 
-		vBus.drawStats(window, font);
-		iBus.drawStats(window, font);
-		DEC_position.drawStats(window, font);
+
 
 		window.display();
 		sf::Time elapsed = clock.restart();

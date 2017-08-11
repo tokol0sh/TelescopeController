@@ -97,3 +97,5 @@ void graph::update(sf::RenderWindow &window) {
 	}
 	window.draw(chart);
 }
+
+
