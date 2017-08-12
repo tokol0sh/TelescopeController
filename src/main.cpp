@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <iostream>
 #include <thread>  
+#include <mutex>
 #include "motor.hpp"
 #include "Serial/serial.h"
 #include <SFML/Graphics.hpp>
@@ -12,6 +13,11 @@
 
 
 std::stack<clock_t> tictoc_stack;
+std::vector<double> Odrive_rxdata(57);
+std::mutex Odrive_rxdata_mutex;
+
+std::vector<double> Odrive_txdata(57);
+std::mutex Odrive_txdata_mutex;
 
 void tic() {
 	tictoc_stack.push(clock());
@@ -26,7 +32,6 @@ void toc() {
 
 void uartComms() {
 	std::string buffer;
-	std::vector<double> Odrive_data(30);
 	printf("Connect to the Odrive\n");
 	serial::Serial SerialPort("COM6", 921600, serial::Timeout::simpleTimeout(1000));
 
@@ -34,49 +39,54 @@ void uartComms() {
 	message = "s 0 6 " + std::to_string(0.0);
 	SerialPort.write(message);
 
+	while (SerialPort.isOpen()) {
+		for (int i = 0; i < 30; i++)
+		{
 
-	for (int i = 0; i < 30; i++)
-	{
+			message = "g 0 " + std::to_string(i);
 
-		message = "g 0 " + std::to_string(i);
+			SerialPort.write(message);
 
-		SerialPort.write(message);
+			SerialPort.readline(buffer, 30, "\n");
 
-		SerialPort.readline(buffer, 30, "\n");
-		Odrive_data[i] = (atof(buffer.c_str()));
+			
+			//std::lock_guard<std::mutex> guard(Odrive_data_mutex);
+			Odrive_rxdata_mutex.lock();
+			Odrive_rxdata[i] = (atof(buffer.c_str()));
+			Odrive_rxdata_mutex.unlock();
 
-		buffer.clear();
-		SerialPort.flush();
+			buffer.clear();
+			SerialPort.flush();
+		}
 	}
 }
 
 
 
 int main(int argc, char** argv) {
+	std::vector<graph> graphs;
+	sf::Clock clock;
+	sf::RenderWindow window(sf::VideoMode(1400, 800), "Space Men");
+	sf::Font font;
+	std::string buffer;
+	std::thread UART(uartComms);
 
 	int i = 0;
 	double gain = 0.0015;
 	double position = 0.0015;
-	std::vector<double> Odrive_data(30);
-	std::vector<graph> graphs;
-	sf::Clock clock;
 
-	sf::RenderWindow window(sf::VideoMode(1400, 800), "Space Men");
-	sf::Font font;
-	std::string buffer;
 
 	std::cout << "Telescope Controller" << std::endl;
 
-
+	
 	// Load font file from disk
 	if (!font.loadFromFile("../src/courier.ttf"))
 	{
 		std::cout << "Error loading font: courier.tff \n";
 	}
 
-
 	printf("Motor Controller Status\n");
-	serial::Serial SerialPort("COM6", 921600, serial::Timeout::simpleTimeout(1000));
+	//serial::Serial SerialPort("COM6", 921600, serial::Timeout::simpleTimeout(1000));
 
 	
 	graphs.emplace_back(700, 100, 500, 100);
@@ -85,16 +95,12 @@ int main(int argc, char** argv) {
 	graphs.emplace_back(700, 500, 500, 100);
 
 	graphs[0].setTitle(font, "M0 Position Setpoint");
-
 	graphs[1].setTitle(font, "DC Bus Voltage");
-
 	graphs[2].setTitle(font, "M0 Position");
-	
-	
 
-	std::string message;
-	message = "s 0 6 " + std::to_string(0.0);
-	SerialPort.write(message);
+	//std::string message;
+	//message = "s 0 6 " + std::to_string(0.0);
+	//SerialPort.write(message);
 
 	
 	while (window.isOpen())
@@ -103,8 +109,8 @@ int main(int argc, char** argv) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 		{
 			gain += 0.0001;
-			message = "s 0 5 " + std::to_string(gain);
-			SerialPort.write(message);
+			//message = "s 0 5 " + std::to_string(gain);
+			//SerialPort.write(message);
 
 			std::cout << "Position setpoint: " << gain << "\n";
 		}
@@ -112,18 +118,18 @@ int main(int argc, char** argv) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 		{
 			gain -= 0.0001;
-			message = "s 0 5 " + std::to_string(gain);
+			//message = "s 0 5 " + std::to_string(gain);
 			std::cout << "Position setpoint: " << gain << "\n";
 			
-			SerialPort.write(message);
+			//SerialPort.write(message);
 		}
 
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 		{
 			position += 10.0;
-			message = "p 0 " + std::to_string(position) + " 0 0";
-			SerialPort.write(message);
+			//message = "p 0 " + std::to_string(position) + " 0 0";
+			//SerialPort.write(message);
 
 			std::cout << "Position setpoint: " << position << "\n";
 		}
@@ -131,14 +137,14 @@ int main(int argc, char** argv) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 		{
 			position -= 10.0;
-			message = "p 0 " + std::to_string(position) + " 0 0";
+			//message = "p 0 " + std::to_string(position) + " 0 0";
 			std::cout << "Position setpoint: " << position << "\n";
 
-			SerialPort.write(message);
+			//SerialPort.write(message);
 		}
 
 
-		for (i = 0; i < 30; i++) 
+/*		for (i = 0; i < 30; i++) 
 		{
 
 			message = "g 0 " + std::to_string(i);
@@ -151,7 +157,7 @@ int main(int argc, char** argv) {
 			buffer.clear();
 			SerialPort.flush();
 		}
-
+		*/
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -165,13 +171,11 @@ int main(int argc, char** argv) {
 			}
 		}
 
-
-		graphs[0].addDatapoint(Odrive_data[VBUS_VOLTAGE]);
-		graphs[1].addDatapoint(Odrive_data[M0_VEL_GAIN]);
-		graphs[2].addDatapoint(Odrive_data[M0_ROTOR_PLL_POS]);
-
-		std::cout << "Position setpoint: " << Odrive_data[M0_POS_SETPOINT]  << "\n";
-
+		Odrive_rxdata_mutex.lock();
+		graphs[0].addDatapoint(Odrive_rxdata[VBUS_VOLTAGE]);
+		graphs[1].addDatapoint(Odrive_rxdata[M0_VEL_GAIN]);
+		graphs[2].addDatapoint(Odrive_rxdata[M0_ROTOR_PLL_POS]);
+		Odrive_rxdata_mutex.unlock();
 		window.clear();
 
 		for (int i = 0; i < graphs.size(); i++) {
@@ -187,6 +191,6 @@ int main(int argc, char** argv) {
 		std::cout << "FPS: " << 1/elapsed.asSeconds() << "\n";
 		
 	}
-	
+	UART.join();
 	return 0;
 }
