@@ -98,4 +98,9 @@ void graph::update(sf::RenderWindow &window) {
 	window.draw(chart);
 }
 
+void graph::update_all(sf::RenderWindow &window, sf::Font &font){
+	update(window);
+	draw(window);
+	drawStats(window, font);
+}
 

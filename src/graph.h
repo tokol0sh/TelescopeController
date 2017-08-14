@@ -28,5 +28,6 @@ public:
 	void draw(sf::RenderWindow &window);
 	void addDatapoint(float data);
 	void update(sf::RenderWindow &window);
+	void graph::update_all(sf::RenderWindow &window, sf::Font &font);
 
 };

@@ -150,9 +150,7 @@ int main(int argc, char** argv) {
 
 		window.clear();
 		for (int i = 0; i < graphs.size(); i++) {
-			graphs[i].update(window);
-			graphs[i].draw(window);
-			graphs[i].drawStats(window, font);
+			graphs[i].update_all(window, font);
 		}
 
 
